@@ -14,7 +14,7 @@ class User(Base):
     id = Column("id", Integer, primary_key=True, autoincrement=True, nullable=False)
     name = Column("name", String(50), nullable=False)
     email = Column("email", String(50), unique=True, nullable=False)
-    senha = Column("senha", String(50), nullable=False)
+    senha = Column("senha", String(500), nullable=False)
     ativo = Column("ativo", Boolean, nullable=False)
     admin = Column("admin", Boolean, default=False)
 
@@ -60,5 +60,5 @@ class ItemPedido(Base):
         self.sabor = sabor
         self.pedido = pedido
         self.tamanho = tamanho
-        seld.quantidade = quantidade
+        self.quantidade = quantidade
         self.preco_unitario = preco_unitario
