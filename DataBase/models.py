@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Boolean, Float
 from sqlalchemy.orm import declarative_base
 from sqlalchemy_utils.types import ChoiceType
+import bcrypt
 
 db = create_engine("mysql+pymysql://root:@localhost:3306/meubanco")
 
@@ -8,12 +9,15 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
+
+
     id = Column("id", Integer, primary_key=True, autoincrement=True, nullable=False)
     name = Column("name", String(50), nullable=False)
     email = Column("email", String(50), unique=True, nullable=False)
     senha = Column("senha", String(50), nullable=False)
     ativo = Column("ativo", Boolean, nullable=False)
     admin = Column("admin", Boolean, default=False)
+
 
     def __init__(self, name, email, senha, ativo=True, admin=False):
         self.name = name
