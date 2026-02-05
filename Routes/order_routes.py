@@ -26,13 +26,20 @@ async def cancelar_pedido(id_pedido: int, session: Session = Depends(pegar_sessi
     print("usuario.admin =", usuario.admin)
     if not usuario.admin and usuario.id != pedido.usuario:
         raise HTTPException(
-            status_code=403,
-            detail='Você não tem autorização para cancelar este pedido'
-        )
+            status_code=403, detail='Você não tem autorização para cancelar este pedido')
 
     pedido.status = 'CANCELADO'
     session.commit()
     return {
-        'mensagem': f'Pedido {id_pedido} cancelado com sucesso!',
+        'mensagem': f'Pedido {pedido.id} cancelado com sucesso!',
         'pedido': pedido
     }
+
+@order_router.get('/listar')
+async def listar_pedidos(usuario: User = Depends(verificar_token), session: Session = Depends(pegar_session)):
+    if not usuario.admin:
+        raise HTTPException(
+            status_code=403, detail='Você não tem autorização para fazer essa operação')
+    else:
+        pedidos = session.query(Pedido).all()
+        return {'pedidos': pedidos}
