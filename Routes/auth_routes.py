@@ -1,18 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException
 from DataBase.models import User
-from Routes.dependencies import pegar_session
+from Routes.dependencies import pegar_session, verificar_token
 from main import SECRET_KEY, ALGORITHM, ACCES_TOKEN_EXPIRES_MINUTES
 from schemas import UsuarioSchemas, LoginSchema
 from sqlalchemy.orm import Session
 import bcrypt
 from jose import jwt,JWTError
 from datetime import datetime, timedelta, timezone
-
+from fastapi.security import OAuth2PasswordRequestForm
 auth_router = APIRouter(prefix="/auth", tags=['Auth'])
 
 def criar_token(id_usuario, duracao_token=timedelta(minutes=ACCES_TOKEN_EXPIRES_MINUTES)):
     data_expiracao = datetime.now(timezone.utc) + duracao_token
-    dic_info = {'sub': id_usuario, 'exp': data_expiracao}
+    dic_info = {'sub': str(id_usuario), 'exp': data_expiracao}
     jwt_codificado = jwt.encode(dic_info, SECRET_KEY, ALGORITHM)
     return jwt_codificado
 
@@ -25,6 +25,8 @@ def autenticar_usuario(email, senha, session):
     if not bcrypt.checkpw(senha_bytes, usuario.senha.encode('utf-8')):
         return False
     return usuario
+
+
 
 @auth_router.get('/')
 async def home():
@@ -60,7 +62,23 @@ async def login(login_schema: LoginSchema, session: Session = Depends(pegar_sess
                 'token_type': 'bearer'
         }
 
-@auth_router.get('/refresh')
-async def use_refresh_token(token):
+@auth_router.post('/login-form')
+async def login_form(dados_formulario: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(pegar_session)):
+    usuario = autenticar_usuario(dados_formulario.username, dados_formulario.password, session)
+    if not usuario:
+        raise HTTPException(status_code=400, detail="Email ou senha incorreto")
+    else:
+        access_token = criar_token(usuario.id)
+        return {
+                'access_token': access_token,
+                'token_type': 'bearer'
+        }
 
+@auth_router.get('/refresh')
+async def use_refresh_token(usuario: User= Depends(verificar_token)):
+    access_token = criar_token(usuario.id)
+    return {
+        'access_token': access_token,
+        'token_type': 'Bearer'
+    }
 
