@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from Routes.dependencies import pegar_session, verificar_token
-from schemas import PedidoSchemas
+from schemas import PedidoSchemas, ItemPedidoSchema
 from sqlalchemy.orm import Session
-from DataBase.models import Pedido, User
+from DataBase.models import Pedido, User, ItemPedido
 order_router = APIRouter(prefix="/order", tags=['Order'], dependencies=[Depends(verificar_token)])
 
 @order_router.get("/")
@@ -43,3 +43,30 @@ async def listar_pedidos(usuario: User = Depends(verificar_token), session: Sess
     else:
         pedidos = session.query(Pedido).all()
         return {'pedidos': pedidos}
+
+@order_router.post('/pedido/adcionar/{id_pedido}')
+async def adcionar_item(id_pedido: str,
+                        item_pedido_schema: ItemPedidoSchema,
+                        usuario: User = Depends(verificar_token),
+                        session: Session = Depends(pegar_session)):
+
+    pedido = session.query(Pedido).filter(Pedido.id==id_pedido).first()
+    if not pedido:
+        raise HTTPException(status_code=400, detail='Pedido não existe')
+    if not usuario.admin and usuario.id != pedido.usuario:
+        raise HTTPException(status_code=403, detail='Você não tem autorização para fazer essa operação')
+    item_pedido = ItemPedido(
+        item_pedido_schema.quantidade,
+        item_pedido_schema.sabor,
+        item_pedido_schema.tamanho,
+        item_pedido_schema.preco,
+        id_pedido
+    )
+    pedido.calcular_preco()
+    session.add(item_pedido)
+    session.commit()
+    return {
+        'mensagem': 'Item criado com sucesso!',
+        'item_id': item_pedido.id,
+        'preco_pedido': pedido.preco
+    }
