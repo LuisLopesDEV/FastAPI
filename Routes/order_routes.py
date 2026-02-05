@@ -45,25 +45,28 @@ async def listar_pedidos(usuario: User = Depends(verificar_token), session: Sess
         return {'pedidos': pedidos}
 
 @order_router.post('/pedido/adcionar/{id_pedido}')
-async def adcionar_item(id_pedido: str,
+async def adcionar_item(id_pedido: int,
                         item_pedido_schema: ItemPedidoSchema,
                         usuario: User = Depends(verificar_token),
                         session: Session = Depends(pegar_session)):
 
     pedido = session.query(Pedido).filter(Pedido.id==id_pedido).first()
+
     if not pedido:
         raise HTTPException(status_code=400, detail='Pedido não existe')
     if not usuario.admin and usuario.id != pedido.usuario:
         raise HTTPException(status_code=403, detail='Você não tem autorização para fazer essa operação')
+
     item_pedido = ItemPedido(
-        item_pedido_schema.quantidade,
-        item_pedido_schema.sabor,
-        item_pedido_schema.tamanho,
-        item_pedido_schema.preco,
-        id_pedido
+        sabor=item_pedido_schema.sabor,
+        pedido=id_pedido,
+        tamanho=item_pedido_schema.tamanho,
+        quantidade=item_pedido_schema.quantidade,
+        preco_unitario=item_pedido_schema.preco_unitario
     )
-    pedido.calcular_preco()
+
     session.add(item_pedido)
+    pedido.calcular_preco()
     session.commit()
     return {
         'mensagem': 'Item criado com sucesso!',

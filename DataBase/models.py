@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Boolean, Float
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy_utils.types import ChoiceType
 import bcrypt
 
@@ -39,7 +39,7 @@ class Pedido(Base):
     status = Column("status", String(50), nullable=False) # Pendente, Cancelado, Finalizado
     usuario = Column("usuario", ForeignKey('users.id'), nullable=False)
     preco = Column("preco", Float, nullable=False)
-    #itens =
+    itens = relationship("ItemPedido", cascade="all, delete")
 
     def __init__(self,usuario, status="PENDENTE", preco=0):
         self.status = status
@@ -47,7 +47,8 @@ class Pedido(Base):
         self.preco = preco
 
     def calcular_preco(self):
-        self.preco = 10
+
+        self.preco = sum(item.preco_unitario * item.quantidade for item in self.itens)
 
 class ItemPedido(Base):
     __tablename__ = "itens_pedidos"
@@ -59,7 +60,7 @@ class ItemPedido(Base):
     preco_unitario = Column("preco_unitario", Float, nullable=False)
     pedido = Column("pedido", ForeignKey('pedidos.id'), nullable=False)
 
-    def __init__ (self, sabor, pedido, tamanho, quantidade=1, preco_unitario=0):
+    def __init__ (self, sabor, pedido, tamanho, quantidade, preco_unitario):
         self.sabor = sabor
         self.pedido = pedido
         self.tamanho = tamanho
