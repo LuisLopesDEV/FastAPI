@@ -1,19 +1,61 @@
-# 📦 API de Pedidos (FastAPI)
+# 🛒 API de Pedidos com Autenticação JWT (FastAPI + MySQL)
 
-Este projeto é uma **API REST** desenvolvida com **FastAPI** para gerenciamento de usuários e pedidos. Ele permite criar pedidos, adicionar/remover itens, cancelar ou finalizar pedidos, além de controle de acesso com autenticação e autorização (usuário comum vs administrador).
+API REST desenvolvida com FastAPI para gerenciamento de usuários e pedidos, com autenticação segura via JWT, controle de permissões (admin/usuário) e integração com banco de dados MySQL utilizando SQLAlchemy.
 
 ---
 
-## 🚀 Tecnologias Utilizadas
+## 🛠️ Tecnologias utilizadas
 
-* **Python 3.10+**
-* **FastAPI**
-* **SQLAlchemy**
-* **MySQL**
-* **Pydantic**
-* **JWT (Token de autenticação)**
-* **Uvicorn**
+- **Python**
+- **FastAPI**
+- **MySQL**
+- **SQLAlchemy**
+- **Alembic** (migrations)
+- **JWT (JSON Web Token)**
+- **bcrypt** (hash de senha)
+- **Pydantic**
+- **OAuth2**
 
+![Python](https://img.shields.io/badge/Python-3.x-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-orange)
+![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow)
+
+---
+
+## ⚙️ Funcionalidades
+
+### 🔐 Autenticação
+- Cadastro de usuários
+- Login com geração de **access token** e **refresh token**
+- Autenticação via JWT
+- Proteção de rotas com OAuth2
+- Renovação de token com refresh token
+
+### 👤 Usuários
+- Controle de permissões (usuário comum e administrador)
+- Restrições de acesso baseadas em perfil
+
+### 🛒 Pedidos
+- Criação de pedidos
+- Cancelamento e finalização de pedidos
+- Listagem de pedidos (admin)
+- Listagem de pedidos por usuário
+- Adição e remoção de itens em pedidos
+- Cálculo automático do valor total do pedido
+
+---
+
+## 🧠 Conceitos aplicados
+
+- Autenticação e autorização com JWT
+- Hash seguro de senhas com bcrypt
+- Arquitetura REST
+- Injeção de dependências (FastAPI)
+- Relacionamentos ORM (SQLAlchemy)
+- Controle de acesso por nível de usuário
+- Versionamento de banco de dados com Alembic
+- Boas práticas de segurança em APIs
 ---
 
 ## 🗂 Estrutura do Projeto
